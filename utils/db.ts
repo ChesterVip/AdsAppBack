@@ -4,9 +4,9 @@ export const pool = createPool({
     host: "localhost",
     user: "maniek",
     password: "maniek666",
-    database: "addsapp",
+    database: "ads_app",
     namedPlaceholders: true,
     decimalNumbers: true,
-    port: 3036,
+    port: 3306
     }
-)
+);

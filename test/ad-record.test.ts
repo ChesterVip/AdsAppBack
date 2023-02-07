@@ -1,5 +1,4 @@
 import {AdRecord} from "../records/ad/ad.record";
-import {ValidationError} from "../utils/errors";
 
 
 const defaultObj = {
