@@ -2,7 +2,7 @@ import express, {json} from "express";
 import cors from "cors";
 import "express-async-errors";
 import rateLimit from "express-rate-limit";
-import {handleError, ValidationError} from "./utils/errors";
+import {handleError} from "./utils/errors";
 
 const app = express();
 
@@ -24,7 +24,7 @@ app.get("/", async (req, res) => {
 app.use(handleError);
 
 app.listen(3001, "0.0.0.0", () => {
-    console.log("Aplikacja napierdala na http://localhost:3001 :P " );
+    console.log("Aplikacja napierdala na http://localhost:3001 :P ");
 })
 
 
