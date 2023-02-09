@@ -1,9 +1,11 @@
-import {AdEntity, NewAdEntity} from "../../types";
+import {AdEntity, NewAdEntity, SimpleAdEntity} from "../../types";
 import {ValidationError} from "../../utils/errors";
 import {pool} from "../../utils/db";
 import {FieldPacket} from "mysql2";
+import { v4 as uuid } from 'uuid';
 
 type AdRecordResults = [AdEntity[], FieldPacket[]];
+type AdSimpleRecordResults = [SimpleAdEntity[], FieldPacket[]];
 export class AdRecord implements AdEntity {
 
     public id: string;
@@ -13,6 +15,13 @@ export class AdRecord implements AdEntity {
     public url: string;
     public lat: number;
     public lon: number;
+
+
+
+
+
+
+
 
     constructor(obj: NewAdEntity) {
         if (!obj.name || obj.name.length > 100){
@@ -49,4 +58,24 @@ export class AdRecord implements AdEntity {
 
         return result.length > 0 ? new AdRecord(result[0]) : null;
     }
+
+    static async findAll(name: string): Promise<SimpleAdEntity []> {
+        const [result] = await pool.execute("SELECT * FROM `ads` WHERE `name` LIKE :search;", {
+            search: `%${name}%`
+        }) as AdRecordResults;
+
+        return result.map(r => {
+            const {id, lat, lon} = r;
+        return {id, lat, lon};
+        });
+    };
+
+    async insert():Promise<void> {
+        if(!this.id){
+            this.id = uuid();
+        }else throw new ValidationError("This Item Already Exists");
+
+        await pool.execute("INSERT INTO `ads`(`id`,`name`,`description`,`price`,`url`,`lat`,`lon`) VALUES(:id,:name,:description,:price,:url,:lat,:lon);", this);
+    }
 }
+
