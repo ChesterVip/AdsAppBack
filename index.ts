@@ -3,6 +3,7 @@ import cors from "cors";
 import "express-async-errors";
 import rateLimit from "express-rate-limit";
 import {handleError} from "./utils/errors";
+import {adRouter} from "./routers/ad.router";
 
 const app = express();
 
@@ -18,11 +19,14 @@ app.use(rateLimit({
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 }))
 
-app.get("/", async (req, res) => {
-    res.send("<h1>Strona Główna</h1>")
-})
+// app.get("/", async (req, res) => {
+//     res.send("<h1>Strona Główna</h1>")
+// })
+
 app.use(handleError);
 
+
+app.use("/ad", adRouter);
 app.listen(3001, "0.0.0.0", () => {
     console.log("Aplikacja napierdala na http://localhost:3001 :P ");
 })
