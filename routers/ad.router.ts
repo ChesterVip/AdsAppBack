@@ -9,7 +9,6 @@ export const adRouter = Router()
         res.json(ads);
     })
     .get("/:id", async (req, res) => {
-
         const ad = await AdRecord.getOne(req.params.id);
         res.json(ad);
     })
