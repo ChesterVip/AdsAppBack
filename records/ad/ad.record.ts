@@ -1,11 +1,13 @@
-import {AdEntity} from "../../types";
+import {AdEntity, NewAdEntity, SimpleAdEntity} from "../../types";
 import {ValidationError} from "../../utils/errors";
+import {pool} from "../../utils/db";
+import {FieldPacket} from "mysql2";
+import { v4 as uuid } from 'uuid';
 
-interface  NewAdEntity extends Omit<AdEntity, "id">{
-    id?: string;
-}
-
+type AdRecordResults = [AdEntity[], FieldPacket[]];
+type AdSimpleRecordResults = [SimpleAdEntity[], FieldPacket[]];
 export class AdRecord implements AdEntity {
+
     public id: string;
     public name: string;
     public description: string;
@@ -13,6 +15,13 @@ export class AdRecord implements AdEntity {
     public url: string;
     public lat: number;
     public lon: number;
+
+
+
+
+
+
+
 
     constructor(obj: NewAdEntity) {
         if (!obj.name || obj.name.length > 100){
@@ -29,14 +38,44 @@ export class AdRecord implements AdEntity {
         if (!obj.url || obj.url.length > 100){
             throw new ValidationError("Link nie może być pusty raz nie dłuższy niż 100 znaków!")
         }
-        if (typeof obj.lat !== "number" || typeof obj.lon !== "number"){
+        if ((typeof obj.lat !== "number") || (typeof obj.lon !== "number")){
             throw new ValidationError("NIe można zlokalizować ogłoszenia");
         }
+
+        this.id = obj.id;
         this.name = obj.name;
         this.description = obj.description;
         this.price = obj.price;
         this.url = obj.url;
-        this.lat= obj.lat;
+        this.lat = obj.lat;
         this.lon = obj.lon;
     }
+
+    static async getOne(id: string): Promise<AdRecord | null>{
+
+        const [result] =
+            await pool.execute("Select * From `ads` WHERE id = :id", {id}) as AdRecordResults;
+
+        return result.length > 0 ? new AdRecord(result[0]) : null;
+    }
+
+    static async findAll(name: string): Promise<SimpleAdEntity []> {
+        const [result] = await pool.execute("SELECT * FROM `ads` WHERE `name` LIKE :search;", {
+            search: `%${name}%`
+        }) as AdRecordResults;
+
+        return result.map(r => {
+            const {id, lat, lon} = r;
+        return {id, lat, lon};
+        });
+    };
+
+    async insert():Promise<void> {
+        if(!this.id){
+            this.id = uuid();
+        }else throw new ValidationError("This Item Already Exists");
+
+        await pool.execute("INSERT INTO `ads`(`id`,`name`,`description`,`price`,`url`,`lat`,`lon`) VALUES(:id,:name,:description,:price,:url,:lat,:lon);", this);
+    }
 }
+
